@@ -11,9 +11,6 @@ fi
 
 export DEBIAN_FRONTEND=noninteractive
 
-# set timezone to UTC
-dpkg-reconfigure tzdata
-
 # https://groups.google.com/forum/#!msg/foundationdb-user/BtJf-1Mlx4I/fxXZClLpnOUJ
 # sources: https://github.com/ripple/docker-fdb-server/blob/master/Dockerfile
 # https://hub.docker.com/r/arypurnomoz/fdb-server/~/dockerfile/
@@ -22,10 +19,13 @@ dpkg-reconfigure tzdata
 
 # need to clean since images could have stale metadata
 apt-get clean && apt-get update
-apt-get install -y -qq build-essential python linux-aws sysstat iftop htop iotop ne
+apt-get install -y -qq build-essential python linux-aws sysstat iftop htop iotop ne tzdata curl wget
+
+# set timezone to UTC
+dpkg-reconfigure tzdata
 
 # install fdbtop
-curl -sL https://deb.nodesource.com/setup_8.x | sudo -E bash -
+curl -sL https://deb.nodesource.com/setup_12.x | bash -
 apt-get install -y -qq nodejs
 npm install -g fdbtop
 
@@ -34,16 +34,16 @@ npm install -g fdbtop
 cd /tmp
 
 # download the dependencies
-wget https://www.foundationdb.org/downloads/6.0.15/ubuntu/installers/foundationdb-clients_6.0.15-1_amd64.deb
-wget https://www.foundationdb.org/downloads/6.0.15/ubuntu/installers/foundationdb-server_6.0.15-1_amd64.deb
+wget https://www.foundationdb.org/downloads/6.2.15/ubuntu/installers/foundationdb-clients_6.2.15-1_amd64.deb
+wget https://www.foundationdb.org/downloads/6.2.15/ubuntu/installers/foundationdb-server_6.2.15-1_amd64.deb
 
 # server depends on the client packages
-dpkg -i foundationdb-clients_6.0.15-1_amd64.deb foundationdb-server_6.0.15-1_amd64.deb
+dpkg -i foundationdb-clients_6.2.15-1_amd64.deb foundationdb-server_6.2.15-1_amd64.deb
 # stop the service
 service foundationdb stop
 
 # add default user to foundationdb group
-sudo usermod -a -G foundationdb ubuntu
+usermod -a -G foundationdb $(whoami)
 
 # ensure correct permissions
 chown -R foundationdb:foundationdb /etc/foundationdb
